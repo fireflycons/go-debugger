@@ -1,4 +1,3 @@
-// debugger/debugger_linux.go
 //go:build linux
 
 package debugger
@@ -49,7 +48,7 @@ func isBeingDebugged() bool {
 			break
 		}
 
-		if name == "dlv" {
+		if name == "dlv" || strings.HasPrefix(name, "gdb") {
 			return true
 		}
 

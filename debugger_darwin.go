@@ -3,7 +3,12 @@
 
 package debugger
 
-import "golang.org/x/sys/unix"
+import (
+	"context"
+	"time"
+
+	"golang.org/x/sys/unix"
+)
 
 // From sys/proc.h on Darwin
 const pTraced = 0x000008
@@ -15,4 +20,8 @@ func isBeingDebugged() bool {
 	}
 
 	return info.Proc.P_flag&pTraced != 0
+}
+
+func poll(context.Context, time.Duration) {
+	// Not supported
 }

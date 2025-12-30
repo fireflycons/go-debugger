@@ -1,23 +1,48 @@
-// Package debugger contains utilities for managing debug sessions of the application the package is imported into.
+// Package debugger contains utilities for managing debug sessions of the application this package is imported into.
 //
 // Supported archtectures and what's detected:
-//   - Linux: dlv or gdb
+//   - Linux: any debugger
 //   - Windows: any debugger
 //   - MacOS: dlv or gdb
 //   - FreeBSD (64 bit): dlv or gdb
 package debugger
 
-// Attached is true if this process was launched by a debugger.
+import (
+	"context"
+	"sync/atomic"
+	"time"
+)
+
+var attached atomic.Bool
+
+// Attached returns true if this process has an attached debugger.
 //
-// This variable is initialized by an init() function, therefore there
-// is zero cost to use it. Example use case would be to dynamically set
+// This reads from a variable that is initialized asynchronously, therefore there
+// is zero cost to call it. It is initialized when the process starts, therefore will
+// start as true if launched by a debugger, e.g. an IDE interactive session.
+//
+// Example use case would be to dynamically set
 // a longer context timeout such that it does not cancel in the middle of a
 // debugging session.
 //
 // Note that the value will not become true if you attach a debugger to
-// an already running process.
-var Attached bool
+// an already running process, unless you have started a poll.
+func Attached() bool {
+	return attached.Load()
+}
+
+// Poll starts a background task to continuously poll at the frequency specified
+// for a debugger attaching after the process has started,
+// and stop polling when the context is cancelled. The value returned by Attached() is updated accordingly.
+//
+// This function returns immediately upon starting the poll goroutine.
+//
+// Currently only supported for Linux and Windows. It is a no-op for any other OS.
+// You probably don't want to do this in production builds.
+func Poll(ctx context.Context, freq time.Duration) {
+	poll(ctx, freq)
+}
 
 func init() {
-	Attached = isBeingDebugged()
+	attached.Store(isBeingDebugged())
 }

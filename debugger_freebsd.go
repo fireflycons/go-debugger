@@ -5,10 +5,12 @@ package debugger
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func isBeingDebugged() bool {
@@ -43,4 +45,8 @@ func isBeingDebugged() bool {
 	}
 
 	return false
+}
+
+func poll(context.Context, time.Duration) {
+	// Not supported
 }

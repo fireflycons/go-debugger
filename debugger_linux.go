@@ -3,10 +3,13 @@
 package debugger
 
 import (
+	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func getParentPID(pid int) (int, error) {
@@ -35,7 +38,17 @@ func getProcessName(pid int) (string, error) {
 }
 
 func isBeingDebugged() bool {
-	pid := os.Getpid()
+
+	// Look up /proc/self/status
+	// This will find any debugger attachment (inc strace etc)
+	pid, err := tracerPID()
+
+	if err == nil {
+		return pid != 0
+	}
+
+	// Fall back to process tree
+	pid = os.Getpid()
 
 	for {
 		ppid, err := getParentPID(pid)
@@ -56,4 +69,48 @@ func isBeingDebugged() bool {
 	}
 
 	return false
+}
+
+func poll(ctx context.Context, freq time.Duration) {
+
+	go func() {
+
+		ticker := time.NewTicker(freq)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if pid, err := tracerPID(); err == nil {
+					attached.Store(pid != 0)
+				}
+			}
+		}
+	}()
+}
+
+func tracerPID() (int, error) {
+
+	f, err := os.Open("/proc/self/status")
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "TracerPid:") {
+			// Split on any whitespace
+			fields := strings.Fields(line)
+			if len(fields) < 2 {
+				return 0, nil
+			}
+			return strconv.Atoi(fields[1])
+		}
+	}
+
+	return 0, scanner.Err()
 }

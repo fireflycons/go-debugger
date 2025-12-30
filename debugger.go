@@ -11,7 +11,7 @@ package debugger
 //
 // This variable is initialized by an init() function, therefore there
 // is zero cost to use it. Example use case would be to dynamically set
-// a context timeout such that it does not cancel in the middle of a
+// a longer context timeout such that it does not cancel in the middle of a
 // debugging session.
 //
 // Note that the value will not become true if you attach a debugger to

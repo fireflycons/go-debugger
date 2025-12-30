@@ -8,12 +8,12 @@ import "github.com/fireflycons/go-debugger"
 
 Package debugger contains utilities for managing debug sessions of the application the package is imported into.
 
-Supported archtectures:
+Supported archtectures and what's detected:
 
-- Linux
-- Windows
-- MacOS
-- FreeBSD \(64 bit\)
+- Linux: dlv or gdb
+- Windows: any debugger
+- MacOS: dlv or gdb
+- FreeBSD \(64 bit\): dlv or gdb
 
 ## Index
 
@@ -26,7 +26,7 @@ Supported archtectures:
 
 This variable is initialized by an init\(\) function, therefore there is zero cost to use it. Example use case would be to dynamically set a context timeout such that it does not cancel in the middle of a debugging session.
 
-Note that the value will not be true if you attach a debugger to an already running process.
+Note that the value will not become true if you attach a debugger to an already running process.
 
 ```go
 var Attached bool

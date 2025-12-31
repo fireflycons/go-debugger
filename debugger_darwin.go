@@ -38,7 +38,7 @@ func isBeingDebugged() bool {
 	}
 
 	for pid != 0 {
-		if names[pid] == "dlv" || strings.HasPrefix(names[pid], "gdb") {
+		if names[pid] == "dlv" || strings.HasPrefix(names[pid], "gdb") || strings.Contains(names[pid], "/dlv") || strings.Contains(names[pid], "/gdb") {
 			return true
 		}
 		pid = parents[pid]

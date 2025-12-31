@@ -35,7 +35,7 @@ func main() {
 		case <-ticker.C:
 			state := debugger.Attached()
 			if state != lastState {
-				fmt.Printf("Debugger attached: %v\n", debugger.Attached())
+				fmt.Printf("Debugger attached: %v\n", state)
 				lastState = state
 			}
 		}
